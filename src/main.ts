@@ -1,23 +1,75 @@
+import { Employee } from './types/Employee';
 import EmployeeOrgApp from './employeeOrgApp';
 import { ceo } from './data/company_tree';
 
-// Instantiate the EmployeeOrgApp
+
 const app = new EmployeeOrgApp(ceo);
 
-// Move an employee
-app.move(7, 3); // Move Bob Saget to be subordinate of Sarah Donald
+// HTML rendering logic (using vanilla JavaScript)
+function renderOrganizationalStructure() {
+  const gameContainer = document.getElementById('game-container');
+  if (!gameContainer) return;
 
-// Print the updated organizational structure
-console.log(app.CEO);
+  gameContainer.innerHTML = ''; // Clear the game container
 
-// Undo the move action
-app.undo();
+  function renderEmployee(employee: Employee, container: HTMLElement) {
+    const employeeCard = document.createElement('div');
+    employeeCard.classList.add('bg-gray-200', 'rounded', 'p-4', 'mb-4');
+    employeeCard.textContent = employee.name;
 
-// Print the organizational structure after undoing the move action
-console.log(app.CEO);
+    container.appendChild(employeeCard);
 
-// Redo the move action
-app.redo();
+    if (employee.subordinates.length > 0) {
+      const subordinatesContainer = document.createElement('div');
+      subordinatesContainer.classList.add('pl-4');
+      employeeCard.appendChild(subordinatesContainer);
 
-// Print the organizational structure after redoing the move action
-console.log(app.CEO);
+      employee.subordinates.forEach(subordinate => {
+        renderEmployee(subordinate, subordinatesContainer);
+      });
+    }
+  }
+
+  renderEmployee(app.CEO, gameContainer);
+
+  // Create buttons for moving employees, undoing moves, and redoing moves
+  const moveButton = document.createElement('button');
+  moveButton.textContent = 'Move Employee';
+  moveButton.addEventListener('click', () => {
+    const employeeID = Number(prompt('Enter the Employee ID to move'));
+    const supervisorID = Number(prompt('Enter the Supervisor ID'));
+
+    moveEmployee(employeeID, supervisorID);
+  });
+
+  const undoButton = document.createElement('button');
+  undoButton.textContent = 'Undo';
+  undoButton.addEventListener('click', undoMove);
+
+  const redoButton = document.createElement('button');
+  redoButton.textContent = 'Redo';
+  redoButton.addEventListener('click', redoMove);
+
+  // Append the buttons to the game container
+  gameContainer.appendChild(moveButton);
+  gameContainer.appendChild(undoButton);
+  gameContainer.appendChild(redoButton);
+}
+
+function moveEmployee(employeeID: number, supervisorID: number) {
+  app.move(employeeID, supervisorID);
+  renderOrganizationalStructure();
+}
+
+function undoMove() {
+  app.undo();
+  renderOrganizationalStructure();
+}
+
+function redoMove() {
+  app.redo();
+  renderOrganizationalStructure();
+}
+
+// Initial rendering
+renderOrganizationalStructure();
