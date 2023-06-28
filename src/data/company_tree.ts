@@ -1,13 +1,13 @@
 import { Employee } from "../types/Employee";
 
-export const ceo: Employee = {
+export const organizationalStructure: Employee = {
 	uniqueId: 1,
 	name: "Mark Zuckerberg",
 	subordinates: [
 		{
 			uniqueId: 2,
 			name: "Bruce Willis",
-			subordinates: [],
+			subordinates: []
 		},
 		{
 			uniqueId: 3,
@@ -16,9 +16,9 @@ export const ceo: Employee = {
 				{
 					uniqueId: 4,
 					name: "Sophie Turner",
-					subordinates: [],
-				},
-			],
+					subordinates: []
+				}
+			]
 		},
 		{
 			uniqueId: 5,
@@ -39,20 +39,20 @@ export const ceo: Employee = {
 										{
 											uniqueId: 9,
 											name: "Will Turner",
-											subordinates: [],
-										},
-									],
-								},
-							],
+											subordinates: []
+										}
+									]
+								}
+							]
 						},
 						{
 							uniqueId: 10,
 							name: "Mary Blue",
-							subordinates: [],
-						},
-					],
-				},
-			],
+							subordinates: []
+						}
+					]
+				}
+			]
 		},
 		{
 			uniqueId: 11,
@@ -61,12 +61,12 @@ export const ceo: Employee = {
 				{
 					uniqueId: 12,
 					name: "Gary Styles",
-					subordinates: [],
+					subordinates: []
 				},
 				{
 					uniqueId: 13,
 					name: "George Carrey",
-					subordinates: [],
+					subordinates: []
 				},
 				{
 					uniqueId: 14,
@@ -75,13 +75,13 @@ export const ceo: Employee = {
 						{
 							uniqueId: 15,
 							name: "Thomas Brown",
-							subordinates: [],
-						},
-					],
-				},
-			],
-		},
-	],
+							subordinates: []
+						}
+					]
+				}
+			]
+		}
+	]
 };
 
 

@@ -1,75 +1,76 @@
 import { Employee } from './types/Employee';
 import EmployeeOrgApp from './employeeOrgApp';
-import { ceo } from './data/company_tree';
+import { organizationalStructure } from './data/company_tree';
 
-
-const app = new EmployeeOrgApp(ceo);
+const app = new EmployeeOrgApp(organizationalStructure);
+const moveCta = document.getElementById('move-cta');
+const undoCta = document.getElementById('undo-cta');
+const redoCta = document.getElementById('redo-cta');
+const DEFAULT_EMPLOYEE_ID = 0;
 
 // HTML rendering logic (using vanilla JavaScript)
-function renderOrganizationalStructure() {
-  const gameContainer = document.getElementById('game-container');
-  if (!gameContainer) return;
+const renderOrganizationalStructure = () => {
+	const gameContainer = document.getElementById('game-container');
+	if (!gameContainer) return;
 
-  gameContainer.innerHTML = ''; // Clear the game container
+	gameContainer.innerHTML = ''; // Clear the game container
 
-  function renderEmployee(employee: Employee, container: HTMLElement) {
-    const employeeCard = document.createElement('div');
-    employeeCard.classList.add('bg-gray-200', 'rounded', 'p-4', 'mb-4');
-    employeeCard.textContent = employee.name;
+	const renderEmployee = (employee: Employee, container: HTMLElement) => {
+		const employeeCard = document.createElement('div');
+		employeeCard.classList.add('bg-gray-200', 'rounded', 'p-4');
+		employeeCard.textContent = employee.name;
 
-    container.appendChild(employeeCard);
+		container.appendChild(employeeCard);
 
-    if (employee.subordinates.length > 0) {
-      const subordinatesContainer = document.createElement('div');
-      subordinatesContainer.classList.add('pl-4');
-      employeeCard.appendChild(subordinatesContainer);
+		if (employee.subordinates.length > 0) {
+			const subordinatesContainer = document.createElement('div');
+			subordinatesContainer.classList.add('pl-4');
+			employeeCard.appendChild(subordinatesContainer);
 
-      employee.subordinates.forEach(subordinate => {
-        renderEmployee(subordinate, subordinatesContainer);
-      });
-    }
-  }
+			employee.subordinates.forEach(subordinate => {
+				renderEmployee(subordinate, subordinatesContainer);
+			});
+		}
+	}
 
-  renderEmployee(app.CEO, gameContainer);
-
-  // Create buttons for moving employees, undoing moves, and redoing moves
-  const moveButton = document.createElement('button');
-  moveButton.textContent = 'Move Employee';
-  moveButton.addEventListener('click', () => {
-    const employeeID = Number(prompt('Enter the Employee ID to move'));
-    const supervisorID = Number(prompt('Enter the Supervisor ID'));
-
-    moveEmployee(employeeID, supervisorID);
-  });
-
-  const undoButton = document.createElement('button');
-  undoButton.textContent = 'Undo';
-  undoButton.addEventListener('click', undoMove);
-
-  const redoButton = document.createElement('button');
-  redoButton.textContent = 'Redo';
-  redoButton.addEventListener('click', redoMove);
-
-  // Append the buttons to the game container
-  gameContainer.appendChild(moveButton);
-  gameContainer.appendChild(undoButton);
-  gameContainer.appendChild(redoButton);
+	renderEmployee(app.CEO, gameContainer);
 }
 
-function moveEmployee(employeeID: number, supervisorID: number) {
-  app.move(employeeID, supervisorID);
-  renderOrganizationalStructure();
+const moveEmployee = (employeeID: number, supervisorID: number) => {
+	app.move(employeeID, supervisorID);
+	renderOrganizationalStructure();
 }
 
-function undoMove() {
-  app.undo();
-  renderOrganizationalStructure();
+const undoMove = () => {
+	app.undo();
+	renderOrganizationalStructure();
 }
 
-function redoMove() {
-  app.redo();
-  renderOrganizationalStructure();
+const redoMove = () => {
+	app.redo();
+	renderOrganizationalStructure();
 }
+
+moveCta?.addEventListener('click', () => {
+	const employeeIdElement = document.getElementById('employeeId');
+	const supervisorElement = document.getElementById('superVisorId');
+
+	const employeeID = employeeIdElement instanceof HTMLInputElement ? Number(employeeIdElement.value) : DEFAULT_EMPLOYEE_ID;
+	const supervisorID = supervisorElement instanceof HTMLInputElement ? Number(supervisorElement.value) : DEFAULT_EMPLOYEE_ID;
+
+	moveEmployee(employeeID, supervisorID);
+
+	// Todo: remove duplicate condition check
+	if (employeeIdElement instanceof HTMLInputElement) {
+		employeeIdElement.value = '';
+	}
+	if (supervisorElement instanceof HTMLInputElement) {
+		supervisorElement.value = '';
+	}
+});
+
+undoCta?.addEventListener('click', undoMove);
+redoCta?.addEventListener('click', redoMove)
 
 // Initial rendering
 renderOrganizationalStructure();

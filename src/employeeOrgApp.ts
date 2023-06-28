@@ -1,112 +1,110 @@
 import { Employee, IEmployeeOrgApp } from './types/Employee';
 
 class EmployeeOrgApp implements IEmployeeOrgApp {
-  public CEO: Employee;
-  private moveHistory: { employee: Employee; oldSupervisor: Employee }[];
-  private redoHistory: { employee: Employee; newSupervisor: Employee }[];
+	public CEO: Employee;
+	private moveHistory: { employee: Employee; oldSupervisor: Employee }[];
+	private redoHistory: { employee: Employee; newSupervisor: Employee }[];
 
-  constructor(CEO: Employee) {
-    this.CEO = CEO;
-    this.moveHistory = [];
-    this.redoHistory = [];
-  }
+	constructor(CEO: Employee) {
+		this.CEO = CEO;
+		this.moveHistory = [];
+		this.redoHistory = [];
+	}
 
-  move(employeeID: number, supervisorID: number): void {
-    const employee = this.findEmployeeByID(this.CEO, employeeID);
-    const supervisor = this.findEmployeeByID(this.CEO, supervisorID);
-  
-    if (employee && supervisor && employee !== supervisor) {
-      const oldSupervisor = this.findSupervisor(this.CEO, employee);
-  
-      if (oldSupervisor) {
-        oldSupervisor.subordinates = oldSupervisor.subordinates.filter(
-          (subordinate) => subordinate !== employee
-        );
-      }
-  
-      supervisor.subordinates.push(employee);
-  
-      this.moveHistory.push({ employee, oldSupervisor });
-      // Clear redo history
-      this.redoHistory = [];
-    }
-  }
+	move(employeeID: number, supervisorID: number): void {
+		const employee = this.findEmployeeByID(this.CEO, employeeID);
+		const supervisor = this.findEmployeeByID(this.CEO, supervisorID);
+		const oldSupervisor = this.findSupervisor(this.CEO, employee);
 
-  undo(): void {
-    const lastMove = this.moveHistory.pop();
+		if (oldSupervisor) {
+			oldSupervisor.subordinates = oldSupervisor.subordinates.filter(
+				(subordinate) => subordinate !== employee
+			);
+		}
 
-    if (lastMove) {
-      const { employee, oldSupervisor } = lastMove;
-      const currentSupervisor = this.findSupervisor(this.CEO, employee);
+		supervisor.subordinates.push(employee);
+		employee.subordinates = [];
 
-      if (currentSupervisor) {
-        currentSupervisor.subordinates = currentSupervisor.subordinates.filter(
-          (subordinate) => subordinate !== employee
-        );
-      }
+		this.moveHistory.push({ employee, oldSupervisor });
+		// Clear the redo history when a new move operation is performed
+		this.redoHistory = [];
+	}
 
-      oldSupervisor.subordinates.push(employee);
+	undo(): void {
+		const lastMove = this.moveHistory.pop();
 
-      this.redoHistory.push({ employee, newSupervisor: currentSupervisor });
-    }
-  }
+		if (lastMove) {
+			const { employee, oldSupervisor } = lastMove;
+			const currentSupervisor = this.findSupervisor(this.CEO, employee);
 
-  redo(): void {
-    const lastRedo = this.redoHistory.pop();
+			if (currentSupervisor) {
+				currentSupervisor.subordinates = currentSupervisor.subordinates.filter(
+					(subordinate) => subordinate !== employee
+				);
+			}
 
-    if (lastRedo) {
-      const { employee, newSupervisor } = lastRedo;
-      const currentSupervisor = this.findSupervisor(this.CEO, employee);
+			oldSupervisor.subordinates.push(employee);
 
-      if (currentSupervisor) {
-        currentSupervisor.subordinates = currentSupervisor.subordinates.filter(
-          (subordinate) => subordinate !== employee
-        );
-      }
+			this.redoHistory.push({ employee, newSupervisor: currentSupervisor });
+		}
+	}
 
-      newSupervisor.subordinates.push(employee);
+	redo(): void {
+		const lastRedo = this.redoHistory.pop();
 
-      this.moveHistory.push({ employee, oldSupervisor: currentSupervisor });
-    }
-  }
+		if (lastRedo) {
+			const { employee, newSupervisor } = lastRedo;
+			const currentSupervisor = this.findSupervisor(this.CEO, employee);
 
-  private findEmployeeByID(root: Employee, employeeID: number): Employee {
-    const stack: Employee[] = [root];
-  
-    while (stack.length > 0) {
-      const current = stack.pop();
-  
-      if (current) {
-        if (current.uniqueId === employeeID) {
-          return current;
-        }
-  
-        stack.push(...current.subordinates);
-      }
-    }
-  
-    // Employee not found in the organization
-    throw new Error('Employee not found');
-  }
+			if (currentSupervisor) {
+				currentSupervisor.subordinates = currentSupervisor.subordinates.filter(
+					(subordinate) => subordinate !== employee
+				);
+			}
 
-  private findSupervisor(root: Employee, employee: Employee): Employee {
-    const stack: Employee[] = [root];
-  
-    while (stack.length > 0) {
-      const current = stack.pop();
-  
-      if (current) {
-        if (current.subordinates.includes(employee)) {
-          return current;
-        }
-  
-        stack.push(...current.subordinates);
-      }
-    }
-    
-    // Supervisor not found in the organization
-    throw new Error('Supervisor not found');
-  }
+			newSupervisor.subordinates.push(employee);
+
+			this.moveHistory.push({ employee, oldSupervisor: currentSupervisor });
+		}
+	}
+
+	public findEmployeeByID(root: Employee, employeeID: number): Employee {
+		const stack: Employee[] = [root];
+
+		while (stack.length > 0) {
+			const current = stack.pop();
+
+			if (current) {
+				if (current.uniqueId === employeeID) {
+					return current;
+				}
+
+				stack.push(...current.subordinates);
+			}
+		}
+
+		// Employee not found in the organization
+		throw new Error('Employee not found');
+	}
+
+	private findSupervisor(root: Employee, employee: Employee): Employee {
+		const stack: Employee[] = [root];
+
+		while (stack.length > 0) {
+			const current = stack.pop();
+
+			if (current) {
+				if (current.subordinates.includes(employee)) {
+					return current;
+				}
+
+				stack.push(...current.subordinates);
+			}
+		}
+
+		throw new Error('Supervisor not found');
+	}
 }
+
 
 export default EmployeeOrgApp;
